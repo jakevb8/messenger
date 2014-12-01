@@ -19,10 +19,16 @@
             android:text="192.168.1.1"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:id="@+id/direct_connect_my_ip_text"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="IP:"
+            android:text="Receiver IP:"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <EditText
@@ -75,8 +81,8 @@
             android:text="Send"
             android:id="@+id/direct_connect_send_button"/>
     </LinearLayout>
-    <ListView
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:id="@+id/direct_connect_message_list"></ListView>
+        android:id="@+id/direct_connect_chat_fragment"></FrameLayout>
 </LinearLayout>

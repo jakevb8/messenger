@@ -1,9 +1,14 @@
 package com.jakevb8.instantmessenger;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.app.TaskStackBuilder;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
 
@@ -107,13 +112,41 @@ public class MessagingService extends Service {
                     String messageText = input.readLine();
                     Message message = new Gson().fromJson(messageText, Message.class);
                     Intent intent = new Intent();
+                    MessageDatabase database = new MessageDatabase(getApplicationContext());
+                    database.addMessage(message);
+                    int messageCount = database.getNewMessageCount();
+                    database.close();
                     intent.setAction(Constants.ACTION_RECEIVE_MESSAGE);
-                    intent.putExtra(Constants.RECEIVER_EXTRA_MESSAGE, message);
+                    //intent.putExtra(Constants.RECEIVER_EXTRA_MESSAGE, message);
                     LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+                    sendNotification(messageCount);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
         }
 
+    }
+    private void sendNotification(int messageCount) {
+
+        // Create an explicit content Intent that starts the main Activity
+        Intent notificationIntent = new Intent(this, DirectConnectActivity.class);
+
+        PendingIntent notificationPendingIntent = PendingIntent.getActivity(this, 0,
+                notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+
+        // Set the notification contents
+        builder.setSmallIcon(R.drawable.ic_launcher)
+                .setContentTitle("Cruise Messenger")
+                .setContentText("You have unread messages (" + messageCount + ")")
+                .setContentIntent(notificationPendingIntent);
+
+        // Get an instance of the Notification manager
+        NotificationManager mNotificationManager = (NotificationManager) getApplicationContext()
+                .getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // Issue the notification
+        mNotificationManager.notify(0, builder.build());
     }
 }

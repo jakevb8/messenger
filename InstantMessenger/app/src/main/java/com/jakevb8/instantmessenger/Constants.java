@@ -7,6 +7,8 @@ public class Constants {
     public static final String ACTION_RECEIVE_MESSAGE = "com.jakevb8.instantmessenger.ACTION_RECEIVE_MESSAGE";
     public static final String SharedPreferencesKey = "InstantMessenger";
     public static final String UserIdKey = "UserId";
+    public static final String UserNameKey = "UserName";
+    public static final String DirectConnectTargetIp = "DirectoConnectTargetIp";
 
     public static final String SERVICE_EXTRA_PORT = "ServiceExtraPort";
     public static final String SERVICE_EXTRA_IP = "SERVICE_EXTRA_IP";

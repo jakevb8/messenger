@@ -1,28 +1,25 @@
 package com.jakevb8.instantmessenger;
 
 import android.app.Activity;
+import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.method.CharacterPickerDialog;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.UUID;
+import java.util.List;
 
 /**
  * Created by Jake on 11/26/2014.
@@ -31,19 +28,19 @@ public class DirectConnectActivity extends Activity {
     MessagingService _messagingService;
     private boolean _isBound;
     private String _userId;
+    private String _userName;
     private String _currentIp;
     private EditText _ip;
     private EditText _port;
     private EditText _message;
-    private ListView _messageList;
     private Button _btnSend;
     private Button _btnConnect;
-    ArrayAdapter<String> _adapter;
+    private ChatFragment _chatFragment;
 
     private ServiceConnection _connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            _messagingService = ((MessagingService.LocalBinder)service).getService();
+            _messagingService = ((MessagingService.LocalBinder) service).getService();
         }
 
         @Override
@@ -55,7 +52,7 @@ public class DirectConnectActivity extends Activity {
     private void doBindService() {
         bindService(new Intent(DirectConnectActivity.this, MessagingService.class), _connection, Context.BIND_AUTO_CREATE);
         _isBound = true;
-        if(_messagingService!=null){
+        if (_messagingService != null) {
             _messagingService.IsBoundable();
         }
     }
@@ -70,18 +67,44 @@ public class DirectConnectActivity extends Activity {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_direct_connect);
         try {
-            _userId = getIntent().getStringExtra(Constants.UserIdKey);
+            final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SharedPreferencesKey, MODE_PRIVATE);
+
+            if(sharedPreferences.contains(Constants.UserIdKey)) {
+                _userId = sharedPreferences.getString(Constants.UserIdKey, "");
+            }
+            if(sharedPreferences.contains(Constants.UserNameKey)) {
+                _userName = sharedPreferences.getString(Constants.UserNameKey, "");
+            }
+
             _currentIp = NetworkUtils.getLocalIpAddress();
 
             _ip = (EditText) findViewById(R.id.direct_connect_ip_text);
+
+            if (sharedPreferences.contains(Constants.DirectConnectTargetIp)) {
+                _ip.setText(sharedPreferences.getString(Constants.DirectConnectTargetIp, ""));
+            } else {
+                _ip.setText(_currentIp);
+            }
+
+            _ip.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                @Override
+                public void afterTextChanged(Editable s) {
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString(Constants.DirectConnectTargetIp, s.toString());
+                    editor.commit();
+                }
+            });
+
             _port = (EditText) findViewById(R.id.direct_connect_port_text);
             _message = (EditText) findViewById(R.id.direct_connect_messge_text);
-            _messageList = (ListView) findViewById(R.id.direct_connect_message_list);
             _btnSend = (Button) findViewById(R.id.direct_connect_send_button);
 
             ((TextView) findViewById(R.id.direct_connect_my_ip_text)).setText(_currentIp);
@@ -106,7 +129,7 @@ public class DirectConnectActivity extends Activity {
                     try {
                         Message message = new Message();
                         message.UserId = _userId;
-                        message.UserName = _userId;
+                        message.UserName = _userName;
                         message.Message = _message.getText().toString();
                         message.TargetIp = _ip.getText().toString();
                         message.TargetPort = Integer.valueOf(_port.getText().toString());
@@ -116,11 +139,13 @@ public class DirectConnectActivity extends Activity {
                     }
                 }
             });
-            _adapter = new ArrayAdapter<String>(this,
-                    android.R.layout.simple_list_item_1, android.R.id.text1, new ArrayList<String>());
-            _messageList.setAdapter(_adapter);
-        }
-        catch (Exception e) {
+            _chatFragment = ChatFragment.newInstance(true);
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+            fragmentTransaction.add(R.id.direct_connect_chat_fragment, _chatFragment);
+            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+            fragmentTransaction.commit();
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -148,10 +173,14 @@ public class DirectConnectActivity extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
             try {
-                Message message = (Message) intent.getSerializableExtra(Constants.RECEIVER_EXTRA_MESSAGE);
-                _adapter.add(message.UserName + ": " + message.Message);
-            }
-            catch (Exception e) {
+                //Message message = (Message) intent.getSerializableExtra(Constants.RECEIVER_EXTRA_MESSAGE);
+                MessageDatabase messageDatabase = new MessageDatabase(context);
+                List<Message> messages = messageDatabase.getNewMessages();
+                messageDatabase.close();
+                for(Message message : messages) {
+                    _chatFragment.addMessage(message.UserId + ": " + message.UserName + ": " + message.Message);
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
