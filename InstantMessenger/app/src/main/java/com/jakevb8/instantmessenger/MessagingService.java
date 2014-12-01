@@ -138,8 +138,8 @@ public class MessagingService extends Service {
 
         // Set the notification contents
         builder.setSmallIcon(R.drawable.ic_launcher)
-                .setContentTitle("Cruise Messenger")
-                .setContentText("You have unread messages (" + messageCount + ")")
+                .setContentTitle("Instant Messenger")
+                .setContentText("You have unread message(s) (" + messageCount + ")")
                 .setContentIntent(notificationPendingIntent);
 
         // Get an instance of the Notification manager
