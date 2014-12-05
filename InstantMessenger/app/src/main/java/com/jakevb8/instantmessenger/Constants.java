@@ -9,6 +9,8 @@ public class Constants {
     public static final String UserIdKey = "UserId";
     public static final String UserNameKey = "UserName";
     public static final String DirectConnectTargetIp = "DirectoConnectTargetIp";
+    public static final String MulticastIp = "MulticastIp";
+    public static final String MulticastPort = "MulticastPort";
 
     public static final String SERVICE_EXTRA_PORT = "ServiceExtraPort";
     public static final String SERVICE_EXTRA_IP = "SERVICE_EXTRA_IP";
