@@ -56,9 +56,8 @@ public class MulticastServer {
                     e.printStackTrace();
                 }
                 try {
-                    String messageData = new String(datagrampacket.getData());
-                    MulticastMessage multicastMessage = new Gson().fromJson(messageData, MulticastMessage.class);
-                    if (multicastMessage != null && multicastMessage.deviceId.equalsIgnoreCase(_deviceId)) {
+                    MulticastMessage multicastMessage = UdpUtils.getBroadcastMessage(datagrampacket);
+                    if (multicastMessage != null && !multicastMessage.deviceId.equalsIgnoreCase(_deviceId)) {
                         Bundle bundleData = new Bundle();
                         bundleData.putSerializable(EXTRA_MULTICAST_MESSAGE, multicastMessage);
                         Message message = Message.obtain(_handler, NEW_MESSAGE_RECEIVED);
@@ -66,7 +65,7 @@ public class MulticastServer {
                         _handler.sendMessage(message);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                   Logger.e(_ontext, "MulticastServer", e);
                 }
             }
             multicastlock.release();

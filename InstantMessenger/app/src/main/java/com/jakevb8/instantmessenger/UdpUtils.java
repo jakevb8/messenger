@@ -15,7 +15,7 @@ import java.net.UnknownHostException;
 
 
 public class UdpUtils {
-
+    public static String BROADCAST_MESSAGE_EOF_DELIMITER = ":3C0CA4C4-CD2E-42DC-B241-4E14BE945254:";
     public UdpUtils() {
     }
 
@@ -39,7 +39,7 @@ public class UdpUtils {
         (new Thread(new Runnable() {
             public void run() {
                 try {
-                    String json = new Gson().toJson(message);
+                    String json = new Gson().toJson(message) + BROADCAST_MESSAGE_EOF_DELIMITER;
                     DatagramSocket datagramsocket = new DatagramSocket();
                     byte data[] = json.getBytes();
                     datagramsocket.send(new DatagramPacket(data, data.length, InetAddress.getByName(ip), port));
@@ -50,6 +50,19 @@ public class UdpUtils {
                 }
             }
         })).start();
+    }
+
+    public static MulticastMessage getBroadcastMessage(DatagramPacket datagrampacket){
+        MulticastMessage multicastMessage = null;
+        try {
+            String messageData = new String(datagrampacket.getData());
+            String[] messageParts = messageData.split(BROADCAST_MESSAGE_EOF_DELIMITER);
+            multicastMessage = new Gson().fromJson(messageParts[0], MulticastMessage.class);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return  multicastMessage;
     }
 
     public static void sendMessage(final String message, final String ipAddress) {

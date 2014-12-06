@@ -13,7 +13,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by jvanburen on 12/4/2014.
@@ -34,18 +33,10 @@ public class MulticastActivity extends Activity {
 
         final SharedPreferences sharedPreferences = getSharedPreferences(Constants.SharedPreferencesKey, MODE_PRIVATE);
 
-        if (sharedPreferences.contains(Constants.UserIdKey)) {
-            _userId = sharedPreferences.getString(Constants.UserIdKey, "");
-        }
-        if (sharedPreferences.contains(Constants.UserNameKey)) {
-            _userName = sharedPreferences.getString(Constants.UserNameKey, "");
-        }
-        if (sharedPreferences.contains(Constants.MulticastIp)) {
-            _multicastIp = sharedPreferences.getString(Constants.MulticastIp, "224.0.0.1");
-        }
-        if (sharedPreferences.contains(Constants.MulticastPort)) {
-            _multicastPort = sharedPreferences.getInt(Constants.MulticastPort, 6100);
-        }
+        _userId = sharedPreferences.getString(Constants.UserIdKey, "");
+        _userName = sharedPreferences.getString(Constants.UserNameKey, "");
+        _multicastIp = sharedPreferences.getString(Constants.MulticastIp, "224.0.0.1");
+        _multicastPort = sharedPreferences.getInt(Constants.MulticastPort, 6100);
 
         final EditText message = (EditText) findViewById(R.id.multicast_messge_text);
         Button sendButton = (Button) findViewById(R.id._multicast_send_button);
@@ -58,8 +49,7 @@ public class MulticastActivity extends Activity {
                     multicastMessage.userName = _userName;
                     multicastMessage.message = message.getText().toString();
                     UdpUtils.sendBroadcastMessage(multicastMessage, _multicastIp, _multicastPort);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }

@@ -9,6 +9,7 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 import java.util.UUID;
@@ -38,13 +39,15 @@ public class MainActivity extends ActionBarActivity {
                 startActivity(intent);
             }
         });
-        findViewById(R.id.main_multicast_button).setOnClickListener(new View.OnClickListener() {
+        Button multicastButton = (Button) findViewById(R.id.main_multicast_button);
+        multicastButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, MulticastActivity.class);
                 startActivity(intent);
             }
         });
+
         txtUserName.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

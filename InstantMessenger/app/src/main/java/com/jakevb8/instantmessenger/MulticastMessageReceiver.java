@@ -16,10 +16,6 @@ public class MulticastMessageReceiver {
 
     public  MulticastMessageReceiver(Context context) {
         _context = context;
-    }
-
-    private MulticastMessageReceiver() {
-        _listener = null;
         _handler = new Handler() {
             public void handleMessage(Message message) {
                 switch (message.what) {
